@@ -3,7 +3,7 @@ const liftSystem = document.getElementById("liftSystem");
 let floors = [];
 let liftsDetail = [];
 let requestQueue = [];
-let pendingRequests = {}; 
+let pendingRequests = {};
 let queueIntervalId;
 
 liftForm.addEventListener("submit", (e) => {
@@ -92,7 +92,7 @@ const buttonHandler = (e) => {
   requestQueue.push(floor);
 
   if (!queueIntervalId) {
-    queueIntervalId = setInterval(handleQueueInterval, 1000);
+    queueIntervalId = setInterval(handleQueueInterval, 100);
   }
 };
 
@@ -121,7 +121,7 @@ const callClosestLift = (floor) => {
   if (liftIndex >= 0) {
     moveLift(liftIndex, floor);
   } else {
-    requestQueue.push(floor); 
+    requestQueue.push(floor);
   }
 };
 
@@ -132,19 +132,23 @@ const moveLift = (liftIndex, requestedFloor) => {
   const time = distance * 2000;
   lift.busy = true;
 
-  liftElement.style.transition = `transform ${time / 1000}s ease-in-out`;
-  liftElement.style.transform = `translateY(-${110 * requestedFloor}px)`;
+  closeDoors(liftElement);
 
   setTimeout(() => {
-    lift.currentFloor = requestedFloor;
-    openDoors(liftElement);
-    setTimeout(() => {
-      closeDoors(liftElement);
-      lift.busy = false;
+    liftElement.style.transition = `transform ${time / 1000}s ease-in-out`;
+    liftElement.style.transform = `translateY(-${110 * requestedFloor}px)`;
 
-      pendingRequests[requestedFloor] = false;
-    }, 2500);
-  }, time);
+    setTimeout(() => {
+      lift.currentFloor = requestedFloor;
+      openDoors(liftElement);
+      setTimeout(() => {
+        closeDoors(liftElement);
+        lift.busy = false;
+
+        pendingRequests[requestedFloor] = false;
+      }, 2500);
+    }, time);
+  }, 2500);
 }
 
 const openDoors = (liftElement) => {
