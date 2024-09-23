@@ -128,12 +128,14 @@ const callClosestLift = (request) => {
   for (let i = 0; i < liftsDetail.length; i++) {
     const lift = liftsDetail[i];
 
+    // Allow different lifts to respond if they are not busy
     if (Math.abs(request.floor - lift.currentFloor) < minDistance && !lift.busy) {
       minDistance = Math.abs(request.floor - lift.currentFloor);
       liftIndex = i;
     }
   }
 
+  // If no lift was found to respond to this request, push back to the queue
   if (liftIndex >= 0) {
     moveLift(liftIndex, request.floor);
   } else {
