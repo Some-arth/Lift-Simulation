@@ -3,7 +3,7 @@ const liftSystem = document.getElementById("liftSystem");
 let floors = [];
 let liftsDetail = [];
 let requestQueue = [];
-let pendingRequests = {}; // Track pending requests
+let pendingRequests = {}; 
 let queueIntervalId;
 
 liftForm.addEventListener("submit", (e) => {
@@ -84,12 +84,12 @@ const displayLifts = (liftsCount) => {
 const buttonHandler = (e) => {
   const floor = Number(e.target.id.match(/\d+/)[0]);
 
-  // If a request for this floor is already pending, ignore the new request
+
   if (pendingRequests[floor]) {
     return;
   }
 
-  // Mark the floor as having a pending request
+ 
   pendingRequests[floor] = true;
   requestQueue.push(floor);
 
@@ -112,7 +112,7 @@ const callClosestLift = (floor) => {
   let liftIndex = -1;
   let minDistance = Infinity;
 
-  // Find the closest available lift
+  
   for (let i = 0; i < liftsDetail.length; i++) {
     const lift = liftsDetail[i];
     if (!lift.busy && Math.abs(floor - lift.currentFloor) < minDistance) {
@@ -121,11 +121,11 @@ const callClosestLift = (floor) => {
     }
   }
 
-  // If a lift is found, move it to the requested floor
+
   if (liftIndex >= 0) {
     moveLift(liftIndex, floor);
   } else {
-    requestQueue.push(floor); // Requeue the request if no lift is available
+    requestQueue.push(floor);
   }
 };
 
@@ -136,7 +136,7 @@ const moveLift = (liftIndex, requestedFloor) => {
   const time = distance * 2000;
   lift.busy = true;
 
-  liftElement.style.transition = `transform ${time / 1000}s ease-in-out`;
+  liftElement.style.transition = `transform ${time / 100}s ease-in-out`;
   liftElement.style.transform = `translateY(-${110 * requestedFloor}px)`;
 
   setTimeout(() => {
@@ -146,7 +146,7 @@ const moveLift = (liftIndex, requestedFloor) => {
       closeDoors(liftElement);
       lift.busy = false;
 
-      // Remove the pending request for this floor after lift operation
+    
       pendingRequests[requestedFloor] = false;
     }, 2500);
   }, time);
