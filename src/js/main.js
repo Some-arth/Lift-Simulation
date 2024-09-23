@@ -129,11 +129,13 @@ const moveLift = (liftIndex, requestedFloor) => {
     const lift = liftsDetail[liftIndex];
     const liftElement = document.getElementById(`lift${liftIndex}`);
     const distance = Math.abs(requestedFloor - lift.currentFloor);
-    const time = distance * 2000;
-    lift.busy = true;
+    
+    // Adjust time based on the number of floors and the height of the floors
+    const time = distance * (2000 / (document.getElementById('liftSystem').childElementCount)); // Divide by the number of floors to adjust speed
 
+    lift.busy = true;
     liftElement.style.transition = `transform ${time / 1000}s linear`;
-    liftElement.style.transform = `translateY(-${110 * requestedFloor}px)`;
+    liftElement.style.transform = `translateY(-${(100 / floors.length) * requestedFloor}vh)`; // Using vh for movement
 
     setTimeout(() => {
         lift.currentFloor = requestedFloor;
