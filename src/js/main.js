@@ -88,14 +88,17 @@ const buttonHandler = (e) => {
 
   if (liftOnFloor && !liftOnFloor.busy) {
     const liftElement = document.getElementById(`lift${liftsDetail.indexOf(liftOnFloor)}`);
-    
+
     if (liftOnFloor.doorClosing) {
       clearTimeout(liftOnFloor.doorTimeout);
       liftOnFloor.doorClosing = false;
       openDoors(liftElement);
       liftOnFloor.doorTimeout = setTimeout(() => {
         closeDoors(liftElement);
-        liftOnFloor.busy = false;
+        liftOnFloor.busy = true;  
+        liftOnFloor.doorTimeout = setTimeout(() => {
+          liftOnFloor.busy = false; 
+        }, 2500);
       }, 2500);
     } else {
       openDoors(liftElement);
@@ -103,9 +106,10 @@ const buttonHandler = (e) => {
       liftOnFloor.busy = true;
       liftOnFloor.doorTimeout = setTimeout(() => {
         closeDoors(liftElement);
-        setTimeout(() => {
+        liftOnFloor.busy = true; 
+        liftOnFloor.doorTimeout = setTimeout(() => {
           liftOnFloor.busy = false; 
-        }, 2500); 
+        }, 2500);
       }, 2500);
     }
     return;
@@ -195,5 +199,5 @@ const closeDoors = (liftElement) => {
 
   setTimeout(() => {
     liftsDetail[liftIndex].doorClosing = false;
-  }, 2500);
+  }, 2500); 
 }
