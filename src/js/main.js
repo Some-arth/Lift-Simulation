@@ -132,7 +132,7 @@ const moveLift = (liftIndex, requestedFloor) => {
     const time = distance * 2000;
     lift.busy = true;
 
-    liftElement.style.transition = `transform ${time / 1000}s ease-in-out`;
+    liftElement.style.transition = `transform ${time / 1000}s linear`;
     liftElement.style.transform = `translateY(-${110 * requestedFloor}px)`;
 
     setTimeout(() => {
