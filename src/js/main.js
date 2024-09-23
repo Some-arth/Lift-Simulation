@@ -90,9 +90,9 @@ const buttonHandler = (e) => {
     const liftElement = document.getElementById(`lift${liftsDetail.indexOf(liftOnFloor)}`);
 
     if (liftOnFloor.doorClosing) {
-      clearTimeout(liftOnFloor.doorTimeout);
+      clearTimeout(liftOnFloor.doorTimeout); // Clear the timeout for door closing
       liftOnFloor.doorClosing = false;
-      openDoors(liftElement);
+      openDoors(liftElement);  // Immediately reopen doors
       liftOnFloor.doorTimeout = setTimeout(() => {
         closeDoors(liftElement);
         liftOnFloor.busy = true;  
