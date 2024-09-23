@@ -84,17 +84,32 @@ const displayLifts = (liftsCount) => {
 const buttonHandler = (e) => {
   const floor = Number(e.target.id.match(/\d+/)[0]);
 
-  
+  let liftOnFloor = liftsDetail.find(lift => lift.currentFloor === floor);
+
+  if (liftOnFloor) {
+    const liftElement = document.getElementById(`lift${liftsDetail.indexOf(liftOnFloor)}`);
+   
+    openDoors(liftElement);
+    
+    clearTimeout(liftOnFloor.doorTimeout);
+    liftOnFloor.busy = true; 
+    
+    liftOnFloor.doorTimeout = setTimeout(() => {
+      closeDoors(liftElement);
+      liftOnFloor.busy = false;
+    }, 2500); 
+    return;  
+  }
+
   if (pendingRequests[floor]) {
     return;
   }
 
- 
   pendingRequests[floor] = true;
   requestQueue.push(floor);
 
   if (!queueIntervalId) {
-    queueIntervalId = setInterval(handleQueueInterval, 200);
+    queueIntervalId = setInterval(handleQueueInterval, 100);
   }
 };
 
