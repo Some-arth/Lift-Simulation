@@ -3,7 +3,7 @@ const liftSystem = document.getElementById("liftSystem");
 let floors = [];
 let liftsDetail = [];
 let requestQueue = [];
-let pendingRequests = {}; 
+let pendingRequests = {}; // Track pending requests
 let queueIntervalId;
 
 liftForm.addEventListener("submit", (e) => {
@@ -84,15 +84,17 @@ const displayLifts = (liftsCount) => {
 const buttonHandler = (e) => {
   const floor = Number(e.target.id.match(/\d+/)[0]);
 
+  
   if (pendingRequests[floor]) {
     return;
   }
 
+ 
   pendingRequests[floor] = true;
   requestQueue.push(floor);
 
   if (!queueIntervalId) {
-    queueIntervalId = setInterval(handleQueueInterval, 100);
+    queueIntervalId = setInterval(handleQueueInterval, 200);
   }
 };
 
@@ -110,6 +112,7 @@ const callClosestLift = (floor) => {
   let liftIndex = -1;
   let minDistance = Infinity;
 
+  // Find the closest available lift
   for (let i = 0; i < liftsDetail.length; i++) {
     const lift = liftsDetail[i];
     if (!lift.busy && Math.abs(floor - lift.currentFloor) < minDistance) {
@@ -118,10 +121,11 @@ const callClosestLift = (floor) => {
     }
   }
 
+ 
   if (liftIndex >= 0) {
     moveLift(liftIndex, floor);
   } else {
-    requestQueue.push(floor);
+    requestQueue.push(floor); 
   }
 };
 
@@ -140,16 +144,13 @@ const moveLift = (liftIndex, requestedFloor) => {
     openDoors(liftElement);
     setTimeout(() => {
       closeDoors(liftElement);
-      setTimeout(() => {
-        lift.busy = false;
-        if (requestQueue.length > 0) {
-          const nextFloor = requestQueue.shift();
-          callClosestLift(nextFloor);
-        }
-      }, 2500);
+      lift.busy = false;
+
+
+      pendingRequests[requestedFloor] = false;
     }, 2500);
   }, time);
-};
+}
 
 const openDoors = (liftElement) => {
   const leftDoor = liftElement.querySelector(".left_door");
