@@ -77,7 +77,7 @@ const displayLifts = (liftsCount) => {
     lift.appendChild(rightDoor);
 
     floor0.appendChild(lift);
-    liftsDetail.push({ currentFloor: 0, busy: false });
+    liftsDetail.push({ currentFloor: 0, busy: false, doorClosing: false });
   }
 };
 
@@ -88,14 +88,24 @@ const buttonHandler = (e) => {
 
   if (liftOnFloor && !liftOnFloor.busy) {
     const liftElement = document.getElementById(`lift${liftsDetail.indexOf(liftOnFloor)}`);
-    openDoors(liftElement);
-    clearTimeout(liftOnFloor.doorTimeout); 
-    liftOnFloor.busy = true; 
     
-    liftOnFloor.doorTimeout = setTimeout(() => {
-      closeDoors(liftElement);
-      liftOnFloor.busy = false;
-    }, 2500);
+    if (liftOnFloor.doorClosing) {
+      clearTimeout(liftOnFloor.doorTimeout);
+      liftOnFloor.doorClosing = false;
+      openDoors(liftElement);
+      liftOnFloor.doorTimeout = setTimeout(() => {
+        closeDoors(liftElement);
+        liftOnFloor.busy = false;
+      }, 2500);
+    } else {
+      openDoors(liftElement);
+      clearTimeout(liftOnFloor.doorTimeout);
+      liftOnFloor.busy = true;
+      liftOnFloor.doorTimeout = setTimeout(() => {
+        closeDoors(liftElement);
+        liftOnFloor.busy = false;
+      }, 2500);
+    }
     return;
   }
 
@@ -141,26 +151,26 @@ const callClosestLift = (floor) => {
 };
 
 const moveLift = (liftIndex, requestedFloor) => {
-    const lift = liftsDetail[liftIndex];
-    const liftElement = document.getElementById(`lift${liftIndex}`);
-    const distance = Math.abs(requestedFloor - lift.currentFloor);
-    const time = distance * 2000;
-    lift.busy = true;
+  const lift = liftsDetail[liftIndex];
+  const liftElement = document.getElementById(`lift${liftIndex}`);
+  const distance = Math.abs(requestedFloor - lift.currentFloor);
+  const time = distance * 2000;
+  lift.busy = true;
 
-    liftElement.style.transition = `transform ${time / 1000}s ease-in-out`;
-    liftElement.style.transform = `translateY(-${110 * requestedFloor}px)`;
+  liftElement.style.transition = `transform ${time / 1000}s ease-in-out`;
+  liftElement.style.transform = `translateY(-${110 * requestedFloor}px)`;
 
+  setTimeout(() => {
+    lift.currentFloor = requestedFloor;
+    openDoors(liftElement);
     setTimeout(() => {
-        lift.currentFloor = requestedFloor;
-        openDoors(liftElement);
-        setTimeout(() => {
-            closeDoors(liftElement);
-            setTimeout(() => {
-                lift.busy = false;
-                pendingRequests[requestedFloor] = false;
-            }, 2500);
-        }, 3000);
-    }, time);
+      closeDoors(liftElement);
+      setTimeout(() => {
+        lift.busy = false;
+        pendingRequests[requestedFloor] = false;
+      }, 2500);
+    }, 3000);
+  }, time);
 };
 
 const openDoors = (liftElement) => {
@@ -172,6 +182,9 @@ const openDoors = (liftElement) => {
 }
 
 const closeDoors = (liftElement) => {
+  const liftIndex = liftElement.id.match(/\d+/)[0];
+  liftsDetail[liftIndex].doorClosing = true;
+
   const leftDoor = liftElement.querySelector(".left_door");
   const rightDoor = liftElement.querySelector(".right_door");
 
