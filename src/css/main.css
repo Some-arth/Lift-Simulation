@@ -104,7 +104,7 @@ input::-webkit-inner-spin-button {
 .lift {
   background-color: black;
   color: white;
-  height: 60px;
+  height: 80px;
   width: 60px;
   position: absolute;
   display: flex;
@@ -113,7 +113,8 @@ input::-webkit-inner-spin-button {
   overflow: hidden;
   padding: 2;
   margin-left: 30px;
-  transition: transform linear;
+  transition: transform ease-in-out;
+  bottom: 20px;
 }
 
 .door {
@@ -131,52 +132,4 @@ input::-webkit-inner-spin-button {
 .right_door {
   transform: translateX(0);
   transition: transform 0.5s ease-in-out;
-}
-
-@media (max-width: 600px) {
-  .lift {
-    width: 40px;
-    height: 80px;
-  }
-
-  .floor {
-    height: 100px;
-    flex-direction: column;
-    justify-content: center;
-    padding: 10px;
-  }
-
-  .buttonBox {
-    width: 100px;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .up_button,
-  .down_button {
-    width: 60px;
-    margin-bottom: 5px;
-  }
-
-  .floor_no {
-    font-size: 14px;
-  }
-
-  .lift {
-    left: auto;
-    margin: 0 5px;
-  }
-
-  .door {
-    width: 50%;
-    height: 100%;
-  }
-
-  .left_door {
-    left: 0;
-  }
-
-  .right_door {
-    right: 0;
-  }
 }
