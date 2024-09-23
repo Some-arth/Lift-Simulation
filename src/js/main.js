@@ -3,7 +3,7 @@ const liftSystem = document.getElementById("liftSystem");
 let floors = [];
 let liftsDetail = [];
 let requestQueue = [];
-let pendingRequests = {}; // Track pending requests
+let pendingRequests = {};
 let queueIntervalId;
 
 liftForm.addEventListener("submit", (e) => {
@@ -86,19 +86,17 @@ const buttonHandler = (e) => {
 
   let liftOnFloor = liftsDetail.find(lift => lift.currentFloor === floor);
 
-  if (liftOnFloor) {
+  if (liftOnFloor && !liftOnFloor.busy) {
     const liftElement = document.getElementById(`lift${liftsDetail.indexOf(liftOnFloor)}`);
-   
     openDoors(liftElement);
-    
-    clearTimeout(liftOnFloor.doorTimeout);
+    clearTimeout(liftOnFloor.doorTimeout); 
     liftOnFloor.busy = true; 
     
     liftOnFloor.doorTimeout = setTimeout(() => {
       closeDoors(liftElement);
       liftOnFloor.busy = false;
-    }, 2500); 
-    return;  
+    }, 2500);
+    return;
   }
 
   if (pendingRequests[floor]) {
@@ -127,7 +125,6 @@ const callClosestLift = (floor) => {
   let liftIndex = -1;
   let minDistance = Infinity;
 
-  // Find the closest available lift
   for (let i = 0; i < liftsDetail.length; i++) {
     const lift = liftsDetail[i];
     if (!lift.busy && Math.abs(floor - lift.currentFloor) < minDistance) {
@@ -136,11 +133,10 @@ const callClosestLift = (floor) => {
     }
   }
 
- 
   if (liftIndex >= 0) {
     moveLift(liftIndex, floor);
   } else {
-    requestQueue.push(floor); 
+    requestQueue.push(floor);
   }
 };
 
@@ -161,11 +157,12 @@ const moveLift = (liftIndex, requestedFloor) => {
             closeDoors(liftElement);
             setTimeout(() => {
                 lift.busy = false;
-                pendingRequests[requestedFloor] = false; 
-            }, 2500); 
-        }, 3000); 
-    }, time); 
+                pendingRequests[requestedFloor] = false;
+            }, 2500);
+        }, 3000);
+    }, time);
 };
+
 const openDoors = (liftElement) => {
   const leftDoor = liftElement.querySelector(".left_door");
   const rightDoor = liftElement.querySelector(".right_door");
