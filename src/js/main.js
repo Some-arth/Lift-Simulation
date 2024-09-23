@@ -3,7 +3,8 @@ const liftSystem = document.getElementById("liftSystem");
 let floors = [];
 let liftsDetail = [];
 let requestQueue = [];
-let pendingRequests = {};
+let pendingRequests = {}; // Track if a floor is pending
+let activeRequests = {}; // Track active requests
 let queueIntervalId;
 
 liftForm.addEventListener("submit", (e) => {
@@ -17,7 +18,7 @@ liftForm.addEventListener("submit", (e) => {
 const displayFloorsAndLifts = (liftsCount, floorsCount) => {
   displayFloors(floorsCount, liftsCount);
   displayLifts(liftsCount);
-}
+};
 
 const displayFloors = (floorsCount, liftsCount) => {
   const viewportWidth = window.innerWidth;
@@ -57,7 +58,7 @@ const displayFloors = (floorsCount, liftsCount) => {
     liftSystem.appendChild(floor);
     floors.push(floor);
   }
-}
+};
 
 const displayLifts = (liftsCount) => {
   const liftSpacing = 80;
@@ -85,8 +86,24 @@ const buttonHandler = (e) => {
   const floor = Number(e.target.id.match(/\d+/)[0]);
   const direction = e.target.classList.contains('up_button') ? 'up' : 'down';
 
-  // Allow any direction request, regardless of existing requests
+  // If a lift is already on this floor and was called in the same direction, reopen doors
+  if (activeRequests[floor] && activeRequests[floor] === direction) {
+    const liftIndex = liftsDetail.findIndex(lift => lift.currentFloor === floor && lift.busy);
+    if (liftIndex >= 0) {
+      reopenDoors(liftIndex);
+      return;
+    }
+  }
+
+  // If the floor is already pending, ignore the new request
+  if (pendingRequests[floor]) {
+    return;
+  }
+
+  // Add to request queue and mark it as pending
+  pendingRequests[floor] = true;
   requestQueue.push({ floor, direction });
+  activeRequests[floor] = direction;
 
   if (!queueIntervalId) {
     queueIntervalId = setInterval(handleQueueInterval, 100);
@@ -111,18 +128,15 @@ const callClosestLift = (request) => {
   for (let i = 0; i < liftsDetail.length; i++) {
     const lift = liftsDetail[i];
 
-    // Allow all lifts to respond, check for minimum distance
     if (Math.abs(request.floor - lift.currentFloor) < minDistance && !lift.busy) {
       minDistance = Math.abs(request.floor - lift.currentFloor);
       liftIndex = i;
     }
   }
 
-  // If no idle lifts found, we just keep the request
   if (liftIndex >= 0) {
     moveLift(liftIndex, request.floor);
   } else {
-    // No lifts are available; re-add the request to the queue
     requestQueue.push(request);
   }
 };
@@ -144,13 +158,20 @@ const moveLift = (liftIndex, requestedFloor) => {
       closeDoors(liftElement);
       setTimeout(() => {
         lift.busy = false;
-        // Check if there are any pending requests for this floor
-        if (requestQueue.some(req => req.floor === requestedFloor)) {
-          requestQueue = requestQueue.filter(req => req.floor !== requestedFloor);
-        }
+        // Remove this floor from pending requests and active requests
+        delete pendingRequests[requestedFloor];
+        delete activeRequests[requestedFloor];
       }, 2500); // Doors stay open for 2.5 seconds
     }, 3000); // Stay on the floor for 3 seconds
   }, time);
+};
+
+const reopenDoors = (liftIndex) => {
+  const liftElement = document.getElementById(`lift${liftIndex}`);
+  openDoors(liftElement);
+  setTimeout(() => {
+    closeDoors(liftElement);
+  }, 2500); // Keep doors open for 2.5 seconds
 };
 
 const openDoors = (liftElement) => {
