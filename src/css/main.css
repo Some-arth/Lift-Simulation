@@ -113,7 +113,7 @@ input::-webkit-inner-spin-button {
   overflow: hidden;
   padding: 2;
   margin-left: 30px;
-  transition: transform linear;
+  transition: transform ease-in-out;
   bottom: 20px;
 }
 
