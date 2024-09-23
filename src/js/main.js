@@ -148,7 +148,7 @@ const moveLift = (liftIndex, requestedFloor) => {
                 lift.busy = false;
                 pendingRequests[requestedFloor] = false; 
             }, 2500); 
-        }, 2500); 
+        }, 3000); 
     }, time); 
 };
 const openDoors = (liftElement) => {
