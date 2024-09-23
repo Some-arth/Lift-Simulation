@@ -84,12 +84,10 @@ const displayLifts = (liftsCount) => {
 const buttonHandler = (e) => {
   const floor = Number(e.target.id.match(/\d+/)[0]);
 
-
   if (pendingRequests[floor]) {
     return;
   }
 
- 
   pendingRequests[floor] = true;
   requestQueue.push(floor);
 
@@ -112,7 +110,6 @@ const callClosestLift = (floor) => {
   let liftIndex = -1;
   let minDistance = Infinity;
 
-  
   for (let i = 0; i < liftsDetail.length; i++) {
     const lift = liftsDetail[i];
     if (!lift.busy && Math.abs(floor - lift.currentFloor) < minDistance) {
@@ -120,7 +117,6 @@ const callClosestLift = (floor) => {
       liftIndex = i;
     }
   }
-
 
   if (liftIndex >= 0) {
     moveLift(liftIndex, floor);
@@ -146,10 +142,15 @@ const moveLift = (liftIndex, requestedFloor) => {
       closeDoors(liftElement);
       setTimeout(() => {
         lift.busy = false;
-      }, 2500); 
-    }, 2500); 
-  }, time); 
+        if (requestQueue.length > 0) {
+          const nextFloor = requestQueue.shift();
+          callClosestLift(nextFloor);
+        }
+      }, 2500);
+    }, 2500);
+  }, time);
 };
+
 const openDoors = (liftElement) => {
   const leftDoor = liftElement.querySelector(".left_door");
   const rightDoor = liftElement.querySelector(".right_door");
