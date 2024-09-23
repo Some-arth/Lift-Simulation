@@ -144,14 +144,12 @@ const moveLift = (liftIndex, requestedFloor) => {
     openDoors(liftElement);
     setTimeout(() => {
       closeDoors(liftElement);
-      lift.busy = false;
-
-    
-      pendingRequests[requestedFloor] = false;
-    }, 2500);
-  }, time);
-}
-
+      setTimeout(() => {
+        lift.busy = false;
+      }, 2500); 
+    }, 2500); 
+  }, time); 
+};
 const openDoors = (liftElement) => {
   const leftDoor = liftElement.querySelector(".left_door");
   const rightDoor = liftElement.querySelector(".right_door");
