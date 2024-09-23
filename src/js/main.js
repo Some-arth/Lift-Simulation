@@ -148,7 +148,7 @@ const moveLift = (liftIndex, requestedFloor) => {
 
 
       pendingRequests[requestedFloor] = false;
-    }, 2500);
+    }, 4000);
   }, time);
 }
 
