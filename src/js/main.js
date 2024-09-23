@@ -130,28 +130,6 @@ const callClosestLift = (floor) => {
 };
 
 const moveLift = (liftIndex, requestedFloor) => {
-  const lift = liftsDetail[liftIndex];
-  const liftElement = document.getElementById(`lift${liftIndex}`);
-  const distance = Math.abs(requestedFloor - lift.currentFloor);
-  const time = distance * 2000;
-  lift.busy = true;
-
-  liftElement.style.transition = `transform ${time / 1000}s ease-in-out`;
-  liftElement.style.transform = `translateY(-${110 * requestedFloor}px)`;
-
-  setTimeout(() => {
-    lift.currentFloor = requestedFloor;
-    openDoors(liftElement);
-    setTimeout(() => {
-      closeDoors(liftElement);
-      lift.busy = false;
-
-
-      pendingRequests[requestedFloor] = false;
-    }, 3000);
-  }, time);
-}
-const moveLift = (liftIndex, requestedFloor) => {
     const lift = liftsDetail[liftIndex];
     const liftElement = document.getElementById(`lift${liftIndex}`);
     const distance = Math.abs(requestedFloor - lift.currentFloor);
