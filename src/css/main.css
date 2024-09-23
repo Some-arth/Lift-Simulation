@@ -133,3 +133,12 @@ input::-webkit-inner-spin-button {
   transform: translateX(0);
   transition: transform 0.7s ease-in-out;
 }
+@media (max-width: 600px) {
+  .lift {
+    width: 50px;
+    height: 50px;
+  }
+  .floor {
+    padding: 5px;
+  }
+}
