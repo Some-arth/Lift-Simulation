@@ -116,7 +116,7 @@ const handleQueueInterval = () => {
     queueIntervalId = null;
     return;
   }
-  
+
   const request = requestQueue.shift();
   callClosestLift(request);
 };
@@ -128,18 +128,21 @@ const callClosestLift = (request) => {
   for (let i = 0; i < liftsDetail.length; i++) {
     const lift = liftsDetail[i];
 
-    // Allow different lifts to respond if they are not busy
-    if (Math.abs(request.floor - lift.currentFloor) < minDistance && !lift.busy) {
-      minDistance = Math.abs(request.floor - lift.currentFloor);
-      liftIndex = i;
+    // Check if the lift can respond (not busy and different direction)
+    if (!lift.busy) {
+      const distance = Math.abs(request.floor - lift.currentFloor);
+      if (distance < minDistance) {
+        minDistance = distance;
+        liftIndex = i;
+      }
     }
   }
 
-  // If no lift was found to respond to this request, push back to the queue
-  if (liftIndex >= 0) {
+  // Move the closest lift if it's available
+  if (liftIndex >= 0 && (activeRequests[request.floor] !== request.direction)) {
     moveLift(liftIndex, request.floor);
   } else {
-    requestQueue.push(request);
+    requestQueue.push(request); // Re-add request if no lift can move
   }
 };
 
