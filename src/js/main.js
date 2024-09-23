@@ -10,12 +10,6 @@ liftForm.addEventListener("submit", (e) => {
   e.preventDefault();
   const lifts = Number(document.getElementById("totalLifts").value);
   const floors = Number(document.getElementById("totalFloors").value);
-  
-  if (!lifts || !floors || lifts <= 0 || floors <= 0) {
-    alert("Enter a number of lifts >=1 and floors >1");
-    return;
-  }
-  
   displayFloorsAndLifts(lifts, floors);
   liftForm.style.display = "none";
 });
@@ -23,7 +17,7 @@ liftForm.addEventListener("submit", (e) => {
 const displayFloorsAndLifts = (liftsCount, floorsCount) => {
   displayFloors(floorsCount, liftsCount);
   displayLifts(liftsCount);
-};
+}
 
 const displayFloors = (floorsCount, liftsCount) => {
   const viewportWidth = window.innerWidth;
@@ -33,7 +27,9 @@ const displayFloors = (floorsCount, liftsCount) => {
     const floor = document.createElement("div");
     floor.classList.add("floor");
     floor.id = `floor${floorsCount - i - 1}`;
-    floor.style.width = viewportWidth > requiredWidth ? `${viewportWidth}px` : `${requiredWidth}px`;
+    floor.style.width = viewportWidth > requiredWidth
+      ? `${viewportWidth}px`
+      : `${requiredWidth}px`;
 
     const upButton = document.createElement("button");
     upButton.innerText = "Up";
@@ -61,7 +57,7 @@ const displayFloors = (floorsCount, liftsCount) => {
     liftSystem.appendChild(floor);
     floors.push(floor);
   }
-};
+}
 
 const displayLifts = (liftsCount) => {
   const liftSpacing = 80;
@@ -81,43 +77,45 @@ const displayLifts = (liftsCount) => {
     lift.appendChild(rightDoor);
 
     floor0.appendChild(lift);
-    liftsDetail.push({ currentFloor: 0, busy: false, doorClosing: false });
+    liftsDetail.push({ currentFloor: 0, busy: false, doorClosing: false, moving: false });
   }
 };
 
 const buttonHandler = (e) => {
   const floor = Number(e.target.id.match(/\d+/)[0]);
-  console.log(`Button pressed for floor: ${floor}`);
 
   let liftOnFloor = liftsDetail.find(lift => lift.currentFloor === floor);
 
-  if (liftOnFloor) {
+  // If lift is on the same floor and not moving
+  if (liftOnFloor && !liftOnFloor.moving) {
     const liftElement = document.getElementById(`lift${liftsDetail.indexOf(liftOnFloor)}`);
-    console.log(`Lift is on floor ${floor}.`);
+
+    // If doors are closing, stop closing and reopen them
     if (liftOnFloor.doorClosing) {
-      console.log(`Lift doors are closing, reopening now.`);
       clearTimeout(liftOnFloor.doorTimeout);
       liftOnFloor.doorClosing = false;
       openDoors(liftElement);
     } else {
-      console.log(`Opening doors for lift on floor ${floor}.`);
       openDoors(liftElement);
-      liftOnFloor.busy = true;
-      liftOnFloor.doorTimeout = setTimeout(() => {
-        closeDoors(liftElement);
-      }, 2500);
     }
+
+    liftOnFloor.busy = true;
+    liftOnFloor.doorTimeout = setTimeout(() => {
+      closeDoors(liftElement);
+      liftOnFloor.doorTimeout = setTimeout(() => {
+        liftOnFloor.busy = false;
+      }, 2500);
+    }, 2500);
+
     return;
   }
 
   if (pendingRequests[floor]) {
-    console.log(`Pending request for floor ${floor} already exists.`);
     return;
   }
 
   pendingRequests[floor] = true;
   requestQueue.push(floor);
-  console.log(`Added floor ${floor} to request queue.`);
 
   if (!queueIntervalId) {
     queueIntervalId = setInterval(handleQueueInterval, 100);
@@ -131,9 +129,8 @@ const handleQueueInterval = () => {
     return;
   }
   const floor = requestQueue.shift();
-  console.log(`Handling queue for floor: ${floor}`);
   callClosestLift(floor);
-};
+}
 
 const callClosestLift = (floor) => {
   let liftIndex = -1;
@@ -141,18 +138,16 @@ const callClosestLift = (floor) => {
 
   for (let i = 0; i < liftsDetail.length; i++) {
     const lift = liftsDetail[i];
-    if (!lift.busy && Math.abs(floor - lift.currentFloor) < minDistance) {
+    if (!lift.busy && !lift.doorClosing && !lift.moving && Math.abs(floor - lift.currentFloor) < minDistance) {
       minDistance = Math.abs(floor - lift.currentFloor);
       liftIndex = i;
     }
   }
 
   if (liftIndex >= 0) {
-    console.log(`Calling lift ${liftIndex} to floor ${floor}`);
     moveLift(liftIndex, floor);
   } else {
     requestQueue.push(floor);
-    console.log(`No available lifts. Floor ${floor} added back to queue.`);
   }
 };
 
@@ -161,25 +156,28 @@ const moveLift = (liftIndex, requestedFloor) => {
   const liftElement = document.getElementById(`lift${liftIndex}`);
   const distance = Math.abs(requestedFloor - lift.currentFloor);
   const time = distance * 2000;
-
   lift.busy = true;
-  console.log(`Moving lift ${liftIndex} from floor ${lift.currentFloor} to ${requestedFloor}`);
+  lift.moving = true;
 
-  liftElement.style.transition = `transform ${time / 1000}s ease-in-out`;
-  liftElement.style.transform = `translateY(-${110 * requestedFloor}px)`;
-
-  setTimeout(() => {
-    lift.currentFloor = requestedFloor;
-    openDoors(liftElement);
-    liftElement.style.transition = ""; // Reset transition for doors
+  // Wait for doors to fully close before moving
+  closeDoors(liftElement);
+  lift.doorTimeout = setTimeout(() => {
+    liftElement.style.transition = `transform ${time / 1000}s ease-in-out`;
+    liftElement.style.transform = `translateY(-${110 * requestedFloor}px)`;
 
     setTimeout(() => {
-      closeDoors(liftElement);
-      lift.busy = false;
-      pendingRequests[requestedFloor] = false;
-      console.log(`Lift ${liftIndex} reached floor ${requestedFloor} and closed doors.`);
-    }, 3000);
-  }, time);
+      lift.currentFloor = requestedFloor;
+      openDoors(liftElement);
+      setTimeout(() => {
+        closeDoors(liftElement);
+        setTimeout(() => {
+          lift.busy = false;
+          lift.moving = false;
+          pendingRequests[requestedFloor] = false;
+        }, 2500);
+      }, 3000);
+    }, time);
+  }, 2500);  // Move only after doors are fully closed (2500ms)
 };
 
 const openDoors = (liftElement) => {
@@ -188,8 +186,7 @@ const openDoors = (liftElement) => {
 
   leftDoor.style.transform = "translateX(-100%)";
   rightDoor.style.transform = "translateX(100%)";
-  console.log(`Doors opening for lift: ${liftElement.id}`);
-};
+}
 
 const closeDoors = (liftElement) => {
   const liftIndex = liftElement.id.match(/\d+/)[0];
@@ -200,9 +197,8 @@ const closeDoors = (liftElement) => {
 
   leftDoor.style.transform = "translateX(0)";
   rightDoor.style.transform = "translateX(0)";
-  console.log(`Doors closing for lift: ${liftElement.id}`);
 
   setTimeout(() => {
     liftsDetail[liftIndex].doorClosing = false;
-  }, 2500); 
-};
+  }, 2500);  // Doors take 2500ms to fully close
+}
