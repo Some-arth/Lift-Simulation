@@ -91,20 +91,20 @@ const buttonHandler = (e) => {
 
   let liftOnFloor = liftsDetail.find(lift => lift.currentFloor === floor);
 
-  if (liftOnFloor && !liftOnFloor.busy) {
+  if (liftOnFloor) {
     const liftElement = document.getElementById(`lift${liftsDetail.indexOf(liftOnFloor)}`);
-    console.log(`Opening doors for lift at floor ${floor}`);
+    console.log(`Lift is on floor ${floor}.`);
     if (liftOnFloor.doorClosing) {
-      console.log(`Lift is closing its doors, reopening now.`);
+      console.log(`Lift doors are closing, reopening now.`);
       clearTimeout(liftOnFloor.doorTimeout);
       liftOnFloor.doorClosing = false;
       openDoors(liftElement);
     } else {
+      console.log(`Opening doors for lift on floor ${floor}.`);
       openDoors(liftElement);
       liftOnFloor.busy = true;
       liftOnFloor.doorTimeout = setTimeout(() => {
         closeDoors(liftElement);
-        liftOnFloor.busy = false;
       }, 2500);
     }
     return;
@@ -161,9 +161,10 @@ const moveLift = (liftIndex, requestedFloor) => {
   const liftElement = document.getElementById(`lift${liftIndex}`);
   const distance = Math.abs(requestedFloor - lift.currentFloor);
   const time = distance * 2000;
-  console.log(`Moving lift ${liftIndex} from floor ${lift.currentFloor} to ${requestedFloor}`);
 
   lift.busy = true;
+  console.log(`Moving lift ${liftIndex} from floor ${lift.currentFloor} to ${requestedFloor}`);
+
   liftElement.style.transition = `transform ${time / 1000}s ease-in-out`;
   liftElement.style.transform = `translateY(-${110 * requestedFloor}px)`;
 
@@ -203,5 +204,5 @@ const closeDoors = (liftElement) => {
 
   setTimeout(() => {
     liftsDetail[liftIndex].doorClosing = false;
-  }, 2500);
+  }, 2500); 
 };
