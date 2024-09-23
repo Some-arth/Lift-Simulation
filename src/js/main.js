@@ -83,13 +83,14 @@ const displayLifts = (liftsCount) => {
 
 const buttonHandler = (e) => {
   const floor = Number(e.target.id.match(/\d+/)[0]);
+  const direction = e.target.classList.contains('up_button') ? 'up' : 'down';
 
-  if (pendingRequests[floor]) {
+  if (pendingRequests[floor] && liftsDetail.some(lift => lift.direction === direction)) {
     return;
   }
 
   pendingRequests[floor] = true;
-  requestQueue.push(floor);
+  requestQueue.push({ floor, direction });
 
   if (!queueIntervalId) {
     queueIntervalId = setInterval(handleQueueInterval, 100);
@@ -106,22 +107,29 @@ const handleQueueInterval = () => {
   callClosestLift(floor);
 }
 
-const callClosestLift = (floor) => {
+const callClosestLift = (request) => {
   let liftIndex = -1;
   let minDistance = Infinity;
 
   for (let i = 0; i < liftsDetail.length; i++) {
     const lift = liftsDetail[i];
-    if (!lift.busy && Math.abs(floor - lift.currentFloor) < minDistance) {
-      minDistance = Math.abs(floor - lift.currentFloor);
+    const isSameFloor = lift.currentFloor === request.floor;
+
+    if (isSameFloor && lift.busy) {
+      continue; 
+    }
+
+    if (Math.abs(request.floor - lift.currentFloor) < minDistance) {
+      minDistance = Math.abs(request.floor - lift.currentFloor);
       liftIndex = i;
     }
   }
 
   if (liftIndex >= 0) {
-    moveLift(liftIndex, floor);
+    liftsDetail[liftIndex].direction = request.direction; 
+    moveLift(liftIndex, request.floor);
   } else {
-    requestQueue.push(floor);
+    requestQueue.push(request); 
   }
 };
 
