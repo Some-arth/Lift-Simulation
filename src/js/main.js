@@ -103,7 +103,9 @@ const buttonHandler = (e) => {
       liftOnFloor.busy = true;
       liftOnFloor.doorTimeout = setTimeout(() => {
         closeDoors(liftElement);
-        liftOnFloor.busy = false;
+        setTimeout(() => {
+          liftOnFloor.busy = false; 
+        }, 2500); 
       }, 2500);
     }
     return;
@@ -166,10 +168,10 @@ const moveLift = (liftIndex, requestedFloor) => {
     setTimeout(() => {
       closeDoors(liftElement);
       setTimeout(() => {
-        lift.busy = false;
+        lift.busy = false; 
         pendingRequests[requestedFloor] = false;
-      }, 2500);
-    }, 3000);
+      }, 2500); 
+    }, 3000); 
   }, time);
 };
 
@@ -190,4 +192,8 @@ const closeDoors = (liftElement) => {
 
   leftDoor.style.transform = "translateX(0)";
   rightDoor.style.transform = "translateX(0)";
+
+  setTimeout(() => {
+    liftsDetail[liftIndex].doorClosing = false;
+  }, 2500);
 }
