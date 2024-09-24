@@ -84,9 +84,8 @@ const buttonHandler = (e) => {
   const button = e.target;
   const floor = Number(button.id.match(/\d+/)[0]);
 
-  // Disable the pressed button and gray it out
   button.disabled = true;
-  button.style.backgroundColor = 'blue';
+  button.style.backgroundColor = 'cyan';
 
   requestQueue.push({ floor, button });
 
