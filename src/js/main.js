@@ -145,7 +145,7 @@ const moveLift = (liftIndex, requestedFloor, button) => {
         button.disabled = false;
         button.style.backgroundColor = '';
       }, 2500);
-    }, 2500);
+    }, 3000);
   }, time);
 };
 
