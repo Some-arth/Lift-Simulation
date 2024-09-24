@@ -3,7 +3,6 @@ const liftSystem = document.getElementById("liftSystem");
 let floors = [];
 let liftsDetail = [];
 let requestQueue = [];
-let pendingRequests = {}; 
 let queueIntervalId;
 
 liftForm.addEventListener("submit", (e) => {
@@ -17,7 +16,7 @@ liftForm.addEventListener("submit", (e) => {
 const displayFloorsAndLifts = (liftsCount, floorsCount) => {
   displayFloors(floorsCount, liftsCount);
   displayLifts(liftsCount);
-}
+};
 
 const displayFloors = (floorsCount, liftsCount) => {
   const viewportWidth = window.innerWidth;
@@ -57,7 +56,7 @@ const displayFloors = (floorsCount, liftsCount) => {
     liftSystem.appendChild(floor);
     floors.push(floor);
   }
-}
+};
 
 const displayLifts = (liftsCount) => {
   const liftSpacing = 80;
@@ -82,14 +81,14 @@ const displayLifts = (liftsCount) => {
 };
 
 const buttonHandler = (e) => {
-  const floor = Number(e.target.id.match(/\d+/)[0]);
+  const button = e.target;
+  const floor = Number(button.id.match(/\d+/)[0]);
 
-  if (pendingRequests[floor]) {
-    return;
-  }
+  // Disable the pressed button and gray it out
+  button.disabled = true;
+  button.style.backgroundColor = 'blue';
 
-  pendingRequests[floor] = true;
-  requestQueue.push(floor);
+  requestQueue.push({ floor, button });
 
   if (!queueIntervalId) {
     queueIntervalId = setInterval(handleQueueInterval, 100);
@@ -102,11 +101,11 @@ const handleQueueInterval = () => {
     queueIntervalId = null;
     return;
   }
-  const floor = requestQueue.shift();
-  callClosestLift(floor);
-}
+  const { floor, button } = requestQueue.shift();
+  callClosestLift(floor, button);
+};
 
-const callClosestLift = (floor) => {
+const callClosestLift = (floor, button) => {
   let liftIndex = -1;
   let minDistance = Infinity;
 
@@ -119,33 +118,36 @@ const callClosestLift = (floor) => {
   }
 
   if (liftIndex >= 0) {
-    moveLift(liftIndex, floor);
+    moveLift(liftIndex, floor, button);
   } else {
-    requestQueue.push(floor);
+    requestQueue.push({ floor, button });
   }
 };
 
-const moveLift = (liftIndex, requestedFloor) => {
-    const lift = liftsDetail[liftIndex];
-    const liftElement = document.getElementById(`lift${liftIndex}`);
-    const distance = Math.abs(requestedFloor - lift.currentFloor);
-    const time = distance * 2000;
-    lift.busy = true;
+const moveLift = (liftIndex, requestedFloor, button) => {
+  const lift = liftsDetail[liftIndex];
+  const liftElement = document.getElementById(`lift${liftIndex}`);
+  const distance = Math.abs(requestedFloor - lift.currentFloor);
+  const time = distance * 2000;
+  lift.busy = true;
 
-    liftElement.style.transition = `transform ${time / 1000}s linear`;
-    liftElement.style.transform = `translateY(-${110 * requestedFloor}px)`;
+  liftElement.style.transition = `transform ${time / 1000}s linear`;
+  liftElement.style.transform = `translateY(-${110 * requestedFloor}px)`;
 
+  setTimeout(() => {
+    lift.currentFloor = requestedFloor;
+    openDoors(liftElement);
     setTimeout(() => {
-        lift.currentFloor = requestedFloor;
-        openDoors(liftElement);
-        setTimeout(() => {
-            closeDoors(liftElement);
-            setTimeout(() => {
-                lift.busy = false;
-                pendingRequests[requestedFloor] = false; 
-            }, 2500); 
-        }, 3000); 
-    }, time); 
+      closeDoors(liftElement);
+      setTimeout(() => {
+        lift.busy = false;
+
+
+        button.disabled = false;
+        button.style.backgroundColor = '';
+      }, 2500);
+    }, 2500);
+  }, time);
 };
 
 const openDoors = (liftElement) => {
@@ -154,7 +156,7 @@ const openDoors = (liftElement) => {
 
   leftDoor.style.transform = "translateX(-100%)";
   rightDoor.style.transform = "translateX(100%)";
-}
+};
 
 const closeDoors = (liftElement) => {
   const leftDoor = liftElement.querySelector(".left_door");
@@ -162,4 +164,4 @@ const closeDoors = (liftElement) => {
 
   leftDoor.style.transform = "translateX(0)";
   rightDoor.style.transform = "translateX(0)";
-}
+};
