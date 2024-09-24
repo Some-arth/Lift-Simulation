@@ -126,10 +126,10 @@ input::-webkit-inner-spin-button {
 
 .left_door {
   transform: translateX(0);
-  transition: transform 0.7s ease-in-out;
+  transition: transform 2.5s linear;
 }
 
 .right_door {
   transform: translateX(0);
-  transition: transform 0.7s ease-in-out;
+  transition: transform 2.5s linear;
 }
