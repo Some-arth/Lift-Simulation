@@ -96,7 +96,7 @@ const buttonHandler = (e) => {
   console.log(`Request added to queue for floor ${floor}.`);
 
   if (!queueIntervalId) {
-    queueIntervalId = setInterval(handleQueueInterval, 100);
+    queueIntervalId = setInterval(handleQueueInterval, 300);
     console.log("Started queue processing.");
   }
 };
