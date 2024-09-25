@@ -9,11 +9,13 @@ liftForm.addEventListener("submit", (e) => {
   e.preventDefault();
   const lifts = Number(document.getElementById("totalLifts").value);
   const floors = Number(document.getElementById("totalFloors").value);
+  console.log(`Form submitted with ${lifts} lifts and ${floors} floors.`);
   displayFloorsAndLifts(lifts, floors);
   liftForm.style.display = "none";
 });
 
 const displayFloorsAndLifts = (liftsCount, floorsCount) => {
+  console.log(`Displaying ${floorsCount} floors and ${liftsCount} lifts.`);
   displayFloors(floorsCount, liftsCount);
   displayLifts(liftsCount);
 };
@@ -55,6 +57,7 @@ const displayFloors = (floorsCount, liftsCount) => {
     floor.appendChild(buttonsContainer);
     liftSystem.appendChild(floor);
     floors.push(floor);
+    console.log(`Added floor ${floorsCount - i - 1}.`);
   }
 };
 
@@ -77,6 +80,7 @@ const displayLifts = (liftsCount) => {
 
     floor0.appendChild(lift);
     liftsDetail.push({ currentFloor: 0, busy: false });
+    console.log(`Added lift ${i} at floor 0.`);
   }
 };
 
@@ -84,13 +88,16 @@ const buttonHandler = (e) => {
   const button = e.target;
   const floor = Number(button.id.match(/\d+/)[0]);
 
+  console.log(`Button pressed on floor ${floor}, direction: ${button.innerText}.`);
   button.disabled = true;
   button.style.backgroundColor = 'cyan';
 
   requestQueue.push({ floor, button });
+  console.log(`Request added to queue for floor ${floor}.`);
 
   if (!queueIntervalId) {
     queueIntervalId = setInterval(handleQueueInterval, 100);
+    console.log("Started queue processing.");
   }
 };
 
@@ -98,9 +105,11 @@ const handleQueueInterval = () => {
   if (!requestQueue.length) {
     clearInterval(queueIntervalId);
     queueIntervalId = null;
+    console.log("Queue processing stopped.");
     return;
   }
   const { floor, button } = requestQueue.shift();
+  console.log(`Processing request for floor ${floor}.`);
   callClosestLift(floor, button);
 };
 
@@ -110,15 +119,18 @@ const callClosestLift = (floor, button) => {
 
   for (let i = 0; i < liftsDetail.length; i++) {
     const lift = liftsDetail[i];
-    if (!lift.busy && Math.abs(floor - lift.currentFloor) < minDistance) {
-      minDistance = Math.abs(floor - lift.currentFloor);
+    const distance = Math.abs(floor - lift.currentFloor);
+    if (!lift.busy && distance < minDistance) {
+      minDistance = distance;
       liftIndex = i;
     }
   }
 
   if (liftIndex >= 0) {
+    console.log(`Closest lift is lift ${liftIndex} with a distance of ${minDistance}.`);
     moveLift(liftIndex, floor, button);
   } else {
+    console.log(`No available lifts. Re-queuing request for floor ${floor}.`);
     requestQueue.push({ floor, button });
   }
 };
@@ -130,19 +142,21 @@ const moveLift = (liftIndex, requestedFloor, button) => {
   const time = distance * 2000;
   lift.busy = true;
 
+  console.log(`Moving lift ${liftIndex} to floor ${requestedFloor} with a time of ${time / 1000} seconds.`);
+
   liftElement.style.transition = `transform ${time / 1000}s linear`;
 const floorHeight = document.querySelector('.floor').offsetHeight;
 liftElement.style.transform = `translateY(-${floorHeight * requestedFloor}px)`;
 
   setTimeout(() => {
     lift.currentFloor = requestedFloor;
+    console.log(`Lift ${liftIndex} reached floor ${requestedFloor}.`);
     openDoors(liftElement);
     setTimeout(() => {
       closeDoors(liftElement);
       setTimeout(() => {
         lift.busy = false;
-
-
+        console.log(`Lift ${liftIndex} is now free.`);
         button.disabled = false;
         button.style.backgroundColor = '';
       }, 2500);
@@ -151,6 +165,7 @@ liftElement.style.transform = `translateY(-${floorHeight * requestedFloor}px)`;
 };
 
 const openDoors = (liftElement) => {
+  console.log("Opening doors.");
   const leftDoor = liftElement.querySelector(".left_door");
   const rightDoor = liftElement.querySelector(".right_door");
 
@@ -159,6 +174,7 @@ const openDoors = (liftElement) => {
 };
 
 const closeDoors = (liftElement) => {
+  console.log("Closing doors.");
   const leftDoor = liftElement.querySelector(".left_door");
   const rightDoor = liftElement.querySelector(".right_door");
 
