@@ -131,7 +131,8 @@ const moveLift = (liftIndex, requestedFloor, button) => {
   lift.busy = true;
 
   liftElement.style.transition = `transform ${time / 1000}s linear`;
-  liftElement.style.transform = `translateY(-${110 * requestedFloor}px)`;
+const floorHeight = document.querySelector('.floor').offsetHeight;
+liftElement.style.transform = `translateY(-${floorHeight * requestedFloor}px)`;
 
   setTimeout(() => {
     lift.currentFloor = requestedFloor;
