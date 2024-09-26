@@ -43,16 +43,26 @@ const displayFloors = (floorsCount, liftsCount) => {
     downButton.id = `down${floorsCount - i - 1}`;
     downButton.classList.add("down_button");
     downButton.addEventListener("click", buttonHandler);
-
+    
+    const openButton =  document.createElement("button");
+    openButton.innerText = "Open";
+    openButton.classList.add("open_button");
+    openButton.addEventListener("click", buttonHandler);
+    
     const floorNumber = document.createElement("span");
     floorNumber.classList.add("floor_no");
     floorNumber.innerText = `Floor ${floorsCount - i - 1}`;
 
     const buttonsContainer = document.createElement("div");
     buttonsContainer.classList.add("buttonBox");
-    if (i > 0) buttonsContainer.appendChild(upButton);
-    buttonsContainer.appendChild(floorNumber);
-    if (i < floorsCount - 1) buttonsContainer.appendChild(downButton);
+    if (floorsCount === 1) {
+      buttonsContainer.appendChild(openButton);
+    }
+    else {
+      if (i > 0) buttonsContainer.appendChild(upButton);
+      buttonsContainer.appendChild(floorNumber);
+      if (i < floorsCount - 1) buttonsContainer.appendChild(downButton);
+    }
 
     floor.appendChild(buttonsContainer);
     liftSystem.appendChild(floor);
@@ -86,9 +96,31 @@ const displayLifts = (liftsCount) => {
 
 const buttonHandler = (e) => {
   const button = e.target;
-  const floor = Number(button.id.match(/\d+/)[0]);
 
-  console.log(`Button pressed on floor ${floor}, direction: ${button.innerText}.`);
+  // Handle "Open?" button separately
+  if (button.innerText === "Open?") {
+    const lift = liftsDetail.find(lift => lift.currentFloor === 0); // Since open button only appears on floor 0
+    if (lift) {
+      const liftElement = document.getElementById(`lift${liftsDetail.indexOf(lift)}`);
+      console.log(`Opening lift on floor 0.`);  // Debugging open button handling
+
+      openDoors(liftElement);
+
+      // Automatically close the doors after a delay (if needed)
+      setTimeout(() => {
+        closeDoors(liftElement);
+        console.log(`Closed doors for lift on floor 0.`);
+      }, 3000);
+    } else {
+      console.log(`No lift found on floor 0.`);
+    }
+    return;  // Exit as the "Open?" button is handled here
+  }
+
+  // General button handling for Up and Down buttons
+  const floor = Number(button.id.match(/\d+/)[0]);
+  console.log(`Button pressed on floor ${floor}, action: ${button.innerText}.`);
+
   button.disabled = true;
   button.style.backgroundColor = 'cyan';
 
@@ -145,8 +177,8 @@ const moveLift = (liftIndex, requestedFloor, button) => {
   console.log(`Moving lift ${liftIndex} to floor ${requestedFloor} with a time of ${time / 1000} seconds.`);
 
   liftElement.style.transition = `transform ${time / 1000}s linear`;
-const floorHeight = document.querySelector('.floor').offsetHeight;
-liftElement.style.transform = `translateY(-${floorHeight * requestedFloor}px)`;
+  const floorHeight = document.querySelector('.floor').offsetHeight;
+  liftElement.style.transform = `translateY(-${floorHeight * requestedFloor}px)`;
 
   setTimeout(() => {
     lift.currentFloor = requestedFloor;
