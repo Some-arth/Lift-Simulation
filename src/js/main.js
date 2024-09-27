@@ -97,16 +97,14 @@ const displayLifts = (liftsCount) => {
 const buttonHandler = (e) => {
   const button = e.target;
 
-  // Handle "Open?" button separately
-  if (button.innerText === "Open?") {
-    const lift = liftsDetail.find(lift => lift.currentFloor === 0); // Since open button only appears on floor 0
+  if (button.innerText === "Open") {
+    const lift = liftsDetail.find(lift => lift.currentFloor === 0); 
     if (lift) {
       const liftElement = document.getElementById(`lift${liftsDetail.indexOf(lift)}`);
-      console.log(`Opening lift on floor 0.`);  // Debugging open button handling
+      console.log(`Opening lift on floor 0.`);  
 
       openDoors(liftElement);
 
-      // Automatically close the doors after a delay (if needed)
       setTimeout(() => {
         closeDoors(liftElement);
         console.log(`Closed doors for lift on floor 0.`);
@@ -114,10 +112,10 @@ const buttonHandler = (e) => {
     } else {
       console.log(`No lift found on floor 0.`);
     }
-    return;  // Exit as the "Open?" button is handled here
+    return;  
   }
 
-  // General button handling for Up and Down buttons
+  
   const floor = Number(button.id.match(/\d+/)[0]);
   console.log(`Button pressed on floor ${floor}, action: ${button.innerText}.`);
 
