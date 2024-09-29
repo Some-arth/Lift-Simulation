@@ -161,7 +161,7 @@ const callClosestLift = (floor, button) => {
     moveLift(liftIndex, floor, button);
   } else {
     console.log(`No available lifts. Re-queuing request for floor ${floor}.`);
-    requestQueue.push({ floor, button });
+    requestQueue.unshift({ floor, button });
   }
 };
 
